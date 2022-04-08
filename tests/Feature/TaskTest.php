@@ -52,11 +52,13 @@ class TaskTest extends TestCase
      */
     public function 削除することできる(){
         $task = Task::factory()->count(10)->create();
-        $response = $this0>deleteJson("api/tasks/1");
+        $response = $this->deleteJson("api/tasks/1");
         $response->assertOk();
 
         $response = $this->getJson("api/tasks");
-        $response->assertJsoncount($tasks0>count()-1);
+        $response
+            ->assertOk()
+            ->assertJsoncount($task->count()-1);
     }
 
      /**
@@ -69,6 +71,19 @@ class TaskTest extends TestCase
         ];
         $response = $this->postJson("api/tasks",$data);
         // dd($response->json());
+        $response
+            ->assertStatus(422)
+            ->assertJsonValidationErrors([
+                "title"=>"The title field is required."
+            ]);
+    }
+    public function タイトルが255文字の場合は登録できない()
+    {
+        $data = [
+            "title" => str_repeat("a",256)
+        ];
+        $response = $this->postJson("api/tasks",$data);
+        dd($response->json());
         $response
             ->assertStatus(422)
             ->assertJsonValidationErrors([
